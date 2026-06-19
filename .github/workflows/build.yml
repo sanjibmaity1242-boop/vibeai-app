@@ -1,0 +1,36 @@
+name: Build VibeAI APK
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-level: '3.10'
+
+    - name: Install Dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libsqlite3-dev lzip
+        pip install --upgrade pip
+        pip install buildozer cython git+https://github.com
+
+    - name: Build with Buildozer
+      run: |
+        yes | buildozer -v android debug
+
+    - name: Upload APK Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: VibeAI-Android-App
+        path: .buildozer/android/platform/build-arm64-v4a_armeabi-v7a/dists/vibeai/bin/*.apk
+        
